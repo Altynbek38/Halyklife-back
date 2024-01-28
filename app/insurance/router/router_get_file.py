@@ -14,11 +14,11 @@ import tempfile
 def get_file(
     iin: str,
     file: UploadFile = File(...),
-    svc: Service = Depends(get_service),
+    svc: Service = Depends(await get_service),
 ):  
     print("Start get File")
     if file.content_type != "application/pdf":
-        raise HTTPException(status_code=400, detail="Only PDF files are allowed")
+        return HTTPException(status_code=400, detail="Only PDF files are allowed")
     
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"app/insurance/router/google.json"
     BUCKET_NAME = os.getenv("BUCKET_NAME")
@@ -37,13 +37,13 @@ def get_file(
         blob.upload_from_filename(temp_pdf_name, content_type="application/pdf")
     finally:
         os.unlink(temp_pdf_name)
-
+ 
     pdf_url = blob.public_url
-
-    response = svc.openai.readBarcodes(pdf_url, iin)
+    print("pre response")
+    response = await svc.openai.readBarcodes(pdf_url, iin)
 
     if response == "True":
-        raise HTTPException(status_code=200, detail="OK")
+        return HTTPException(status_code=200, detail="OK")
 
-    raise response
+    return response
 

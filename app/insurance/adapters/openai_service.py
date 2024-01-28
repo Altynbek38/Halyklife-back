@@ -92,10 +92,10 @@ class OpenAI:
                         response = await client.post(api_url, json=data)
 
                     if response.is_error:
-                        raise HTTPException(status_code=response.status_code, detail="Error from external API")
+                        return HTTPException(status_code=response.status_code, detail="Error from external API")
 
                     if response.status_code == 404:
-                            raise HTTPException(
+                            return HTTPException(
                             status_code=404,
                             detail="GUID not found",
                             )
